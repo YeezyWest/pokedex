@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
+import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface Pokemon {
   name: string;
@@ -14,7 +15,6 @@ export default function Index() {
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [loading, setLoading] = useState(true);
 
-  console.log(JSON.stringify(pokemon[0], null, 2));
   useEffect(() => {
     fetchPokemon();
   }, []);
@@ -69,16 +69,18 @@ export default function Index() {
       <Text style={styles.title}>Pokedex</Text>
       <View style={styles.grid}>
         {pokemon.map((p) => (
-          <View key={p.name} style={styles.card}>
-            <Image
-              style={styles.image}
-              source={p.image}
-              placeholder={blurhash}
-              contentFit="contain"
-              transition={1000}
-            />
-            <Text style={styles.name}>{p.name}</Text>
-          </View>
+          <Link key={p.name} href={`/pokemon/${p.name.toLowerCase()}`} asChild>
+            <Pressable style={styles.card}>
+              <Image
+                style={styles.image}
+                source={p.image}
+                placeholder={blurhash}
+                contentFit="contain"
+                transition={1000}
+              />
+              <Text style={styles.name}>{p.name}</Text>
+            </Pressable>
+          </Link>
         ))}
       </View>
     </ScrollView>
