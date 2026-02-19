@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -100,6 +101,7 @@ export default function PokemonDetail() {
 
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [evolutionChain, setEvolutionChain] = useState<EvolutionLink[]>([]);
+  const [flavorText, setFlavorText] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -113,9 +115,20 @@ export default function PokemonDetail() {
       const data: PokemonDetail = await res.json();
       setPokemon(data);
 
-      // Fetch species → evolution chain
+      // Fetch species → flavor text + evolution chain
       const speciesRes = await fetch(data.species.url);
       const speciesData = await speciesRes.json();
+
+      // Get English flavor text (clean whitespace/newlines)
+      const englishEntry = speciesData.flavor_text_entries?.find(
+        (e: any) => e.language.name === "en"
+      );
+      if (englishEntry) {
+        setFlavorText(
+          englishEntry.flavor_text.replace(/[\f\n\r]/g, " ").trim()
+        );
+      }
+
       const evoRes = await fetch(speciesData.evolution_chain.url);
       const evoData = await evoRes.json();
       setEvolutionChain(flattenEvolutionChain(evoData.chain));
@@ -150,7 +163,13 @@ export default function PokemonDetail() {
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.iconButton}>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              router.back();
+            }}
+            style={styles.iconButton}
+          >
             <Ionicons name="arrow-back" size={20} color="#6B7280" />
           </Pressable>
           <View style={styles.headerInfo}>
@@ -161,7 +180,10 @@ export default function PokemonDetail() {
           </View>
           <TouchableOpacity
             style={styles.iconButton}
-            onPress={() => toggleFavourite(displayName)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              toggleFavourite(displayName);
+            }}
           >
             <Ionicons
               name={fav ? "heart" : "heart-outline"}
@@ -207,6 +229,20 @@ export default function PokemonDetail() {
               ))}
             </View>
           </View>
+
+          {/* Bio / Pokedex entry */}
+          {flavorText ? (
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>Pokédex Entry</Text>
+                <View style={styles.liveChip}>
+                  <Ionicons name="book-outline" size={12} color="#6B7280" style={{ marginRight: 4 }} />
+                  <Text style={styles.liveText}>Official</Text>
+                </View>
+              </View>
+              <Text style={styles.flavorText}>{flavorText}</Text>
+            </View>
+          ) : null}
 
           {/* Stats card */}
           <View style={styles.card}>
@@ -606,4 +642,10 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   buttonText: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
+  flavorText: {
+    fontSize: 14,
+    lineHeight: 22,
+    color: "#4B5563",
+    fontStyle: "italic",
+  },
 });
