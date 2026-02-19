@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Pressable,
+    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -21,7 +22,11 @@ interface PokemonDetail {
       "official-artwork": {
         front_default: string;
       };
+      home: {
+        front_default: string;
+      };
     };
+    front_default: string;
   };
   stats: {
     base_stat: number;
@@ -42,27 +47,36 @@ interface PokemonDetail {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  normal: "#A8A878",
-  fire: "#F08030",
-  water: "#6890F0",
-  electric: "#F8D030",
-  grass: "#78C850",
-  ice: "#98D8D8",
-  fighting: "#C03028",
-  poison: "#A040A0",
-  ground: "#E0C068",
-  fly: "#A890F0",
-  psychic: "#F85888",
-  bug: "#A8B820",
-  rock: "#B8A038",
-  ghost: "#705898",
-  dragon: "#7038F8",
-  dark: "#705848",
-  steel: "#B8B8D0",
-  fairy: "#EE99AC",
+  normal: "#94A3B8",
+  fire: "#F87171",
+  water: "#60A5FA",
+  electric: "#FACC15",
+  grass: "#4ADE80",
+  ice: "#99E6E6",
+  fighting: "#E11D48",
+  poison: "#A855F7",
+  ground: "#D97706",
+  fly: "#818CF8",
+  psychic: "#F472B6",
+  bug: "#84CC16",
+  rock: "#78350F",
+  ghost: "#6366F1",
+  dragon: "#4F46E5",
+  dark: "#1F2937",
+  steel: "#475569",
+  fairy: "#EC4899",
 };
 
 const STAT_LABELS: Record<string, string> = {
+  hp: "Health Points",
+  attack: "Attack Power",
+  defense: "Defense Level",
+  "special-attack": "Spec. Attack",
+  "special-defense": "Spec. Defense",
+  speed: "Agility Speed",
+};
+
+const STAT_SHORT: Record<string, string> = {
   hp: "HP",
   attack: "ATK",
   defense: "DEF",
@@ -97,231 +111,355 @@ export default function PokemonDetail() {
   if (loading || !pokemon) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#FF0000" />
+        <ActivityIndicator size="large" color="#4F46E5" />
       </View>
     );
   }
 
   const mainType = pokemon.types[0].type.name;
-  const themeColor = TYPE_COLORS[mainType] || "#666";
+  const themeColor = TYPE_COLORS[mainType] || "#4F46E5";
+  const artworkUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: themeColor }]}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </Pressable>
-        <Text style={styles.headerName}>
-          {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
-        </Text>
-        <Text style={styles.headerId}>
-          #{String(pokemon.id).padStart(3, "0")}
-        </Text>
-      </View>
-
-      <View style={styles.imageContainer}>
-        <Image
-          style={styles.image}
-          source={pokemon.sprites.other["official-artwork"].front_default}
-          contentFit="contain"
-          transition={500}
-        />
-      </View>
-
-      <View style={styles.contentCard}>
-        <View style={styles.typesRow}>
-          {pokemon.types.map((t) => (
-            <View
-              key={t.type.name}
-              style={[
-                styles.typeBadge,
-                { backgroundColor: TYPE_COLORS[t.type.name] },
-              ]}
-            >
-              <Text style={styles.typeText}>
-                {t.type.name.toUpperCase()}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        <Text style={[styles.sectionTitle, { color: themeColor }]}>About</Text>
-        
-        <View style={styles.infoRow}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoValue}>{pokemon.weight / 10}kg</Text>
-            <Text style={styles.infoLabel}>Weight</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoItem}>
-            <Text style={styles.infoValue}>{pokemon.height / 10}m</Text>
-            <Text style={styles.infoLabel}>Height</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={styles.infoItem}>
-            <View>
-              {pokemon.abilities.slice(0, 2).map((a) => (
-                <Text key={a.ability.name} style={styles.infoValue}>
-                  {a.ability.name}
-                </Text>
-              ))}
-            </View>
-            <Text style={styles.infoLabel}>Abilities</Text>
-          </View>
-        </View>
-
-        <Text style={[styles.sectionTitle, { color: themeColor }]}>Base Stats</Text>
-        
-        {pokemon.stats.map((s) => (
-          <View key={s.stat.name} style={styles.statRow}>
-            <Text style={styles.statLabel}>{STAT_LABELS[s.stat.name]}</Text>
-            <Text style={styles.statValue}>
-              {String(s.base_stat).padStart(3, "0")}
+    <SafeAreaView style={styles.safeArea}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.iconButton}>
+            <Ionicons name="arrow-back" size={20} color="#6B7280" />
+          </Pressable>
+          <View style={styles.headerInfo}>
+            <Text style={styles.headerId}>ID: #{String(pokemon.id).padStart(3, "0")}</Text>
+            <Text style={styles.headerName}>
+              {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
             </Text>
-            <View style={styles.progressBarBg}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: `${Math.min(100, (s.base_stat / 200) * 100)}%`,
-                    backgroundColor: themeColor,
-                  },
-                ]}
+          </View>
+          <Pressable style={styles.iconButton}>
+            <Ionicons name="share-outline" size={20} color="#6B7280" />
+          </Pressable>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.heroSection}>
+            <View style={[styles.imageBg, { backgroundColor: `${themeColor}15` }]}>
+              <Image
+                style={styles.image}
+                source={{ uri: artworkUrl }}
+                contentFit="contain"
+                transition={400}
+                onError={(e) => console.log("Detail image load failed:", e)}
+                cachePolicy="memory-disk"
               />
             </View>
+            
+            <View style={styles.typesRow}>
+              {pokemon.types.map((t) => (
+                <View
+                  key={t.type.name}
+                  style={[
+                    styles.typeBadge,
+                    { backgroundColor: TYPE_COLORS[t.type.name] || "#666" },
+                  ]}
+                >
+                  <Text style={styles.typeText}>
+                    {t.type.name.toUpperCase()}
+                  </Text>
+                </View>
+              ))}
+            </View>
           </View>
-        ))}
+
+          <View style={styles.statsCard}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Performance Metrics</Text>
+              <View style={styles.liveIndicator}>
+                <View style={[styles.dot, { backgroundColor: themeColor }]} />
+                <Text style={styles.liveText}>Real-time data</Text>
+              </View>
+            </View>
+
+            <View style={styles.metricsGrid}>
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Height</Text>
+                <Text style={styles.metricValue}>{pokemon.height / 10} m</Text>
+              </View>
+              <View style={styles.metricDivider} />
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Weight</Text>
+                <Text style={styles.metricValue}>{pokemon.weight / 10} kg</Text>
+              </View>
+              <View style={styles.metricDivider} />
+              <View style={styles.metricItem}>
+                <Text style={styles.metricLabel}>Skills</Text>
+                <Text style={styles.metricValue} numberOfLines={1}>
+                  {pokemon.abilities[0].ability.name}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.statsList}>
+              {pokemon.stats.map((s) => (
+                <View key={s.stat.name} style={styles.statRow}>
+                  <View style={styles.statLabelContainer}>
+                    <Text style={styles.statShortLabel}>{STAT_SHORT[s.stat.name]}</Text>
+                    <Text style={styles.statFullLabel}>{STAT_LABELS[s.stat.name]}</Text>
+                  </View>
+                  <View style={styles.statProgressContainer}>
+                    <View style={styles.progressBarBg}>
+                      <View
+                        style={[
+                          styles.progressBarFill,
+                          {
+                            width: `${Math.min(100, (s.base_stat / 180) * 100)}%`,
+                            backgroundColor: themeColor,
+                          },
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.statNumber}>
+                      {String(s.base_stat).padStart(3, "0")}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.actionSection}>
+            <Pressable style={[styles.mainButton, { backgroundColor: "#4F46E5" }]}>
+              <Text style={styles.buttonText}>Generate Intelligence Report</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
   container: {
     flex: 1,
+    backgroundColor: "#F9FAFB",
   },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
+    backgroundColor: "#FFFFFF",
   },
-  backButton: {
-    padding: 8,
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
-  headerName: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    flex: 1,
-    marginLeft: 10,
+  headerInfo: {
+    alignItems: "center",
   },
   headerId: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
-  imageContainer: {
+  headerName: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+  heroSection: {
     alignItems: "center",
-    zIndex: 1,
+    paddingVertical: 32,
+  },
+  imageBg: {
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
   },
   image: {
-    width: 250,
-    height: 250,
-    marginBottom: -40,
-  },
-  contentCard: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 40,
-    minHeight: 500,
+    width: 200,
+    height: 200,
   },
   typesRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
-    gap: 10,
+    gap: 8,
   },
   typeBadge: {
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   typeText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 12,
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginVertical: 15,
+  statsCard: {
+    marginHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  infoRow: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 24,
   },
-  infoItem: {
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  liveIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 6,
+  },
+  liveText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  metricsGrid: {
+    flexDirection: "row",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: "#F3F4F6",
+  },
+  metricItem: {
     flex: 1,
     alignItems: "center",
   },
-  divider: {
+  metricDivider: {
     width: 1,
-    height: 40,
-    backgroundColor: "#ddd",
+    height: "100%",
+    backgroundColor: "#E5E7EB",
   },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    textAlign: "center",
+  metricLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    marginBottom: 4,
   },
-  infoLabel: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 5,
+  metricValue: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#1F2937",
+  },
+  statsList: {
+    gap: 16,
   },
   statRow: {
+    marginBottom: 12,
+  },
+  statLabelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 8,
+  },
+  statShortLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: "#4B5563",
+  },
+  statFullLabel: {
+    fontSize: 11,
+    color: "#9CA3AF",
+    fontWeight: "500",
+  },
+  statProgressContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
-  },
-  statLabel: {
-    width: 50,
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#666",
-  },
-  statValue: {
-    width: 40,
-    fontSize: 14,
-    color: "#333",
-    textAlign: "right",
-    marginRight: 10,
+    gap: 12,
   },
   progressBarBg: {
     flex: 1,
-    height: 8,
-    backgroundColor: "#eee",
-    borderRadius: 4,
+    height: 6,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 3,
     overflow: "hidden",
   },
   progressBarFill: {
     height: "100%",
-    borderRadius: 4,
+    borderRadius: 3,
+  },
+  statNumber: {
+    width: 32,
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#111827",
+    textAlign: "right",
+  },
+  actionSection: {
+    marginHorizontal: 20,
+    marginTop: 24,
+  },
+  mainButton: {
+    height: 56,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#4F46E5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
