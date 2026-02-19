@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Image,
     Pressable,
     SafeAreaView,
     ScrollView,
@@ -118,7 +118,7 @@ export default function PokemonDetail() {
 
   const mainType = pokemon.types[0].type.name;
   const themeColor = TYPE_COLORS[mainType] || "#4F46E5";
-  const artworkUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`;
+  const artworkUrl = `https://img.pokemondb.net/artwork/large/${pokemon.name}.jpg`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -145,10 +145,8 @@ export default function PokemonDetail() {
               <Image
                 style={styles.image}
                 source={{ uri: artworkUrl }}
-                contentFit="contain"
-                transition={400}
+                resizeMode="contain"
                 onError={(e) => console.log("Detail image load failed:", e)}
-                cachePolicy="memory-disk"
               />
             </View>
             

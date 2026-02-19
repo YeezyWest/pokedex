@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { Link, Stack } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -20,8 +20,7 @@ interface Pokemon {
   id: number;
 }
 
-const blurhash =
-  "|rF?hV%2WCj[ayWD_4f6fQfROBP8j[f6f6fR[fRE_4f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7";
+
 
 export default function Index() {
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
@@ -42,16 +41,12 @@ export default function Index() {
         data.results.map(async (p: any, index: number) => {
           try {
             const id = index + 1;
-            // Trying a more reliable image source directly from GitHub raw as fallback
-            // but official artwork is usually best. HOME is also very good.
-            const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-            const fallbackUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`;
-            
+            // pokemondb.net is a very stable, direct CDN for artwork by name
+            const imageUrl = `https://img.pokemondb.net/artwork/large/${p.name}.jpg`;
             return {
               id,
               name: p.name.charAt(0).toUpperCase() + p.name.slice(1),
               image: imageUrl,
-              fallback: fallbackUrl,
             };
           } catch (err) {
             return null;
@@ -130,11 +125,8 @@ export default function Index() {
                   <Image
                     style={styles.image}
                     source={{ uri: p.image }}
-                    placeholder={blurhash}
-                    contentFit="contain"
-                    transition={300}
-                    onError={(e) => console.log(`Failed loading ${p.name}:`, e)}
-                    cachePolicy="memory-disk"
+                    resizeMode="contain"
+                    onError={() => console.log(`Failed loading ${p.name} from pokemondb`)}
                   />
                   <Text style={styles.idNumber}>#{String(p.id).padStart(3, "0")}</Text>
                 </View>
